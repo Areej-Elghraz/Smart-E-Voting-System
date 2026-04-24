@@ -2,7 +2,7 @@ Flask
 Flask-SQLAlchemy
 Flask-Bcrypt
 Flask-Login
-Flask-Mail
+requests
 Flask-Caching
 scikit-learn
 numpy

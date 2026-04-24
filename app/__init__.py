@@ -3,13 +3,13 @@ import os
 import socket
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from flask_mail import Mail
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 from flask_caching import Cache
 from app.models import db, User
 
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-mail = Mail()
 cache = Cache()
 
 def create_app():
@@ -24,19 +24,11 @@ def create_app():
     app.config['CACHE_TYPE'] = 'SimpleCache'
     app.config['CACHE_DEFAULT_TIMEOUT'] = 300
     
-    # Mail Config
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USE_TLS'] = False
-    app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'areejelghrazzz@gmail.com')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'dczqfwodlpoubasp')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'areejelghrazzz@gmail.com')
-
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+    
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
-    mail.init_app(app)
     cache.init_app(app)
     
     login_manager.login_view = 'auth.login'

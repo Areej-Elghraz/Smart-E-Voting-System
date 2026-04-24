@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from flask_mail import Message
 from app.models import db, User, AuditLog
-from app import bcrypt, mail, cache
+from app import bcrypt, cache
 from app.smart_features import calculate_session_risk
 import random
 import string
 from datetime import datetime, timedelta
-from threading import Thread
+import os
+import requests
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -22,23 +22,42 @@ def log_audit(user_id, action, ip_address, details=""):
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
-def send_async_email(app, msg):
-    with app.app_context():
-        try:
-            mail.send(msg)
-            print(f"\n OTP sent successfully to email")
-        except Exception as e:
-            print(f"\n[EMAIL ERROR] Could not send email: {e}")
-
-def send_otp_email(app, email, otp):
-    msg = Message('Your Login OTP', sender='areejelghrazzz@gmail.com', recipients=[email])
-    msg.body = f'Your OTP for login is: {otp}'
+def send_otp_email(email, otp):
+    # SendGrid API Key MUST be set as an environment variable for security
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    if not api_key:
+        print("\n[SENDGRID ERROR] SENDGRID_API_KEY not set in environment.")
+        print(f"[BACKUP] OTP for {email} is: {otp}\n")
+        return
+        
+    url = "https://api.sendgrid.com/v3/mail/send"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "personalizations": [{
+            "to": [{"email": email}],
+            "subject": "Your Login OTP - Smart E-Voting"
+        }],
+        "from": {"email": "areejelghrazzz@gmail.com"},
+        "content": [{
+            "type": "text/plain",
+            "value": f"Your OTP for login is: {otp}"
+        }]
+    }
     
-    # Send in background thread
-    Thread(target=send_async_email, args=(app._get_current_object(), msg)).start()
+    try:
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 202:
+            print(f"\n[SENDGRID] OTP sent successfully to {email}")
+        else:
+            print(f"\n[SENDGRID ERROR] Status: {response.status_code}, Body: {response.text}")
+    except Exception as e:
+        print(f"\n[SENDGRID ERROR] Exception: {e}")
     
-    # Always print to console for development/backup
-    print(f"\n[BACKUP] OTP for {email} is: {otp}\n")
+    # Always print to console as backup
+    print(f"[BACKUP] OTP for {email} is: {otp}\n")
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -98,8 +117,7 @@ def login():
             session['resend_attempts'] = 0
             session['lockout_time'] = None
             
-            from flask import current_app
-            send_otp_email(current_app, user.email, otp)
+            send_otp_email(user.email, otp)
                 
             # Reset failed attempts on password success (but still need OTP)
             user.failed_login_count = 0
@@ -198,8 +216,7 @@ def resend_otp():
         session['otp'] = otp
         session['resend_attempts'] = attempts + 1
         
-        from flask import current_app
-        send_otp_email(current_app, user.email, otp)
+        send_otp_email(user.email, otp)
         flash('A new OTP has been sent to your email.', 'success')
     else:
         flash('User error.', 'danger')
