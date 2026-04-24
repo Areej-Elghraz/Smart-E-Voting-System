@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Create Election</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.manage_elections') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Organization</label>
+                        <select name="organization_id" class="form-select" required>
+                            {% for org in orgs %}
+                            <option value="{{ org.id }}">{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Election Topics (comma-separated)</label>
+                        <input type="text" class="form-control" name="topics" placeholder="e.g. Economy, Health, Education">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Time</label>
+                        <input type="datetime-local" class="form-control" name="start_time">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Time</label>
+                        <input type="datetime-local" class="form-control" name="end_time">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create Election</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Manage Elections</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="electionsAccordion">
+                    {% for election in elections %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ election.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ election.id }}">
+                                {{ election.title }} ({{ election.organization.name }}) - <span
+                                    class="badge bg-{% if election.status == 'active' %}success{% elif election.status == 'upcoming' %}warning{% else %}secondary{% endif %} ms-2">{{
+                                    election.status }}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ election.id }}" class="accordion-collapse collapse"
+                            data-bs-parent="#electionsAccordion">
+                            <div class="accordion-body">
+                                <div class="mb-3 small text-muted">
+                                    {% if election.start_time %}
+                                        <i class="fas fa-clock me-1"></i> Start: {{ election.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                                    {% endif %}
+                                    {% if election.end_time %}
+                                        <i class="fas fa-flag-checkered me-1"></i> End: {{ election.end_time.strftime('%Y-%m-%d %H:%M') }}
+                                    {% endif %}
+                                </div>
+                                <!-- Election Actions -->
+                                <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                                    <form method="POST"
+                                        action="{{ url_for('admin.update_election_status', election_id=election.id) }}"
+                                        class="m-0">
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="submit" name="status" value="upcoming"
+                                                class="btn btn-outline-warning {% if election.status == 'upcoming' %}active{% endif %}">Upcoming</button>
+                                            <button type="submit" name="status" value="active"
+                                                class="btn btn-outline-success {% if election.status == 'active' %}active{% endif %}">Active</button>
+                                            <button type="submit" name="status" value="closed"
+                                                class="btn btn-outline-secondary {% if election.status == 'closed' %}active{% endif %}">Closed</button>
+                                        </div>
+                                    </form>
+                                    <a href="{{ url_for('admin.election_results', election_id=election.id) }}"
+                                        class="btn btn-sm btn-info text-white">Results</a>
+
+                                    <button class="btn btn-sm btn-outline-primary ms-auto" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#editElection{{ election.id }}">Edit</button>
+
+                                    <form method="POST"
+                                        action="{{ url_for('admin.delete_election', election_id=election.id) }}"
+                                        onsubmit="return confirm('Are you sure you want to delete this election? All votes and candidates will be lost.')"
+                                        class="m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+
+                                <!-- Edit Election Form -->
+                                <div class="collapse mb-4" id="editElection{{ election.id }}">
+                                    <div class="card card-body bg-light">
+                                        <h6>Edit Election Details</h6>
+                                            <form method="POST"
+                                            action="{{ url_for('admin.update_election', election_id=election.id) }}">
+                                            <div class="mb-2">
+                                                <label class="form-label small">Title</label>
+                                                <input type="text" class="form-control form-control-sm" name="title"
+                                                    value="{{ election.title }}" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Description</label>
+                                                <textarea class="form-control form-control-sm" name="description"
+                                                    rows="2">{{ election.description }}</textarea>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Election Topics (comma-separated)</label>
+                                                <input type="text" class="form-control form-control-sm" name="topics"
+                                                    value="{{ election.topics or '' }}" placeholder="e.g. Economy, Health">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Start Time</label>
+                                                <input type="datetime-local" class="form-control form-control-sm" name="start_time" value="{{ election.start_time.isoformat()[:16] if election.start_time else '' }}">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">End Time</label>
+                                                <input type="datetime-local" class="form-control form-control-sm" name="end_time" value="{{ election.end_time.isoformat()[:16] if election.end_time else '' }}">
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Candidates Section -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Candidates ({{ election.candidates|length }})</h6>
+                                    <button class="btn btn-sm btn-link p-0 text-decoration-none" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#addCandidate{{ election.id }}">
+                                        + Add New
+                                    </button>
+                                </div>
+
+                                <ul class="list-group mb-3">
+                                    {% for candidate in election.candidates %}
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ candidate.name }}</strong>
+                                                <small class="d-block text-muted">{{ candidate.description }}</small>
+                                                <small class="d-block text-info">Keywords: {{
+                                                    candidate.platform_keywords }}</small>
+                                            </div>
+                                            <div class="d-flex gap-1">
+                                                <button class="btn btn-sm btn-outline-primary ms-auto" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#editCandidate{{ candidate.id }}">
+                                                    Edit
+                                                </button>
+                                                <form method="POST"
+                                                    action="{{ url_for('admin.delete_candidate', candidate_id=candidate.id) }}"
+                                                    onsubmit="return confirm('Delete this candidate?')">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <!-- Edit Candidate Form -->
+                                        <div class="collapse mt-2" id="editCandidate{{ candidate.id }}">
+                                            <form method="POST"
+                                                action="{{ url_for('admin.update_candidate', candidate_id=candidate.id) }}"
+                                                class="bg-light p-2 rounded border small">
+                                                <div class="mb-2">
+                                                    <input type="text" class="form-control form-control-sm" name="name"
+                                                        value="{{ candidate.name }}" required>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        name="platform_keywords"
+                                                        value="{{ candidate.platform_keywords }}"
+                                                        placeholder="Keywords">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <textarea class="form-control form-control-sm" name="description"
+                                                        rows="2">{{ candidate.description }}</textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-xs btn-primary">Update</button>
+                                                <button type="button" class="btn btn-xs btn-link text-secondary"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#editCandidate{{ candidate.id }}">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                    {% else %}
+                                    <li class="list-group-item text-muted">No candidates yet.</li>
+                                    {% endfor %}
+                                </ul>
+
+                                <!-- Add Candidate Form -->
+                                <div class="collapse" id="addCandidate{{ election.id }}">
+                                    <form method="POST"
+                                        action="{{ url_for('admin.add_candidate', election_id=election.id) }}"
+                                        class="bg-light p-3 rounded border">
+                                        <h6>Add Candidate</h6>
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control form-control-sm" name="name"
+                                                    placeholder="Name" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control form-control-sm"
+                                                    name="platform_keywords"
+                                                    placeholder="Keywords (e.g. economy, health)">
+                                            </div>
+                                            <div class="col-12">
+                                                <textarea class="form-control form-control-sm" name="description"
+                                                    placeholder="Description/Platform" rows="2"></textarea>
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-sm btn-primary w-100">Add
+                                                    Candidate</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p>No elections found.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

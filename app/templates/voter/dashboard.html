@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Your Organizations</h5></div>
+            <ul class="list-group list-group-flush">
+                {% for org in orgs %}
+                    <li class="list-group-item">
+                        <strong>{{ org.name }}</strong>
+                        <p class="text-muted small mb-0">{{ org.description }}</p>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">You are not a member of any organizations yet.</li>
+                {% endfor %}
+            </ul>
+            <div class="card-footer bg-white border-top-0 pt-3">
+                <form method="POST" action="{{ url_for('voter.join_org') }}">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="access_code" class="form-control" placeholder="Enter Access Code" required>
+                        <button class="btn btn-outline-primary" type="submit">Join</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Active Elections</h5></div>
+            <div class="card-body">
+                {% for election in elections %}
+                    <div class="card mb-3 border-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ election.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Org: {{ election.organization.name }}</h6>
+                            <p class="card-text">{{ election.description }}</p>
+                            <div class="mb-3 small text-muted">
+                                {% if election.start_time %}
+                                    <i class="fas fa-clock me-1"></i> Start: {{ election.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                                {% endif %}
+                                {% if election.end_time %}
+                                    <i class="fas fa-flag-checkered me-1"></i> End: {{ election.end_time.strftime('%Y-%m-%d %H:%M') }}
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('voter.view_election', election_id=election.id) }}" class="btn btn-primary">View Election</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No active elections at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

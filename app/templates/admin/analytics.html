@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold"><i class="fas fa-chart-line me-2"></i>Smart Analytics & Security</h2>
+            <p class="text-muted">Real-time engagement monitoring, participation prediction, and behavioral security analytics.</p>
+        </div>
+    </div>
+
+    <!-- Top Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-bold">Registration Completion</h6>
+                    <h2 class="mb-0">{{ engagement.registration_completion_rate }}</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(255,255,255,0.2);">
+                        <div class="progress-bar bg-white" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-bold">Avg. Time to Vote</h6>
+                    <h2 class="mb-0">{{ engagement.average_time_to_vote }}</h2>
+                    <p class="small mb-0 mt-2 opacity-75">Optimized workflow</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-warning text-white h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-bold">Current Bottleneck</h6>
+                    <h2 class="mb-0 small fw-bold">{{ engagement.bottleneck_page }}</h2>
+                    <p class="small mb-0 mt-2 opacity-75">High drop-off rate here</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-danger text-white h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-bold">Locked Accounts</h6>
+                    <h2 class="mb-0">{{ total_locked }}</h2>
+                    <p class="small mb-0 mt-2 opacity-75">Security enforcement</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Participation Predictions -->
+        <div class="col-md-7 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary">Participation Prediction</h5>
+                </div>
+                <div class="card-body">
+                    {% if predictions %}
+                        {% for election, pred in predictions.items() %}
+                        <div class="mb-4 p-3 border rounded bg-light">
+                            <h6 class="fw-bold">{{ election }}</h6>
+                            <div class="row mt-3">
+                                <div class="col-4 text-center border-end">
+                                    <small class="text-muted d-block">Expected Turnout</small>
+                                    <span class="fs-4 fw-bold text-success">{{ pred.expected_turnout }}</span>
+                                </div>
+                                <div class="col-4 text-center border-end">
+                                    <small class="text-muted d-block">Predicted Peak</small>
+                                    <span class="fs-4 fw-bold text-primary">{{ pred.peak_hour }}</span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <small class="text-muted d-block">Current Velocity</small>
+                                    <span class="fs-4 fw-bold text-info">{{ pred.velocity }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-info-circle text-muted mb-3 fa-2x"></i>
+                            <p class="text-muted">No active elections to predict participation for.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Behavioral Security: Risky Sessions -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-danger">Risky Sessions (Smart Score)</h5>
+                    <span class="badge bg-danger">Alerts</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>IP Address</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in risky_sessions %}
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold">{% if session.user %}{{ session.user.username }}{% else %}Unknown{% endif %}</span>
+                                        <small class="d-block text-muted">{{ session.timestamp.strftime('%H:%M:%S') }}</small>
+                                    </td>
+                                    <td>{{ session.ip_address }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                <div class="progress-bar {% if session.risk_score > 80 %}bg-danger{% else %}bg-warning{% endif %}" 
+                                                     role="progressbar" style="width: {{ session.risk_score }}%"></div>
+                                            </div>
+                                            <span class="fw-bold small">{{ session.risk_score|int }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if not risky_sessions %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No high-risk sessions detected.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <p class="small text-muted mb-0"><i class="fas fa-shield-alt me-1"></i> Based on real-time behavioral analytics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Candidate Engagement -->
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-info">Candidate Engagement monitoring</h5>
+                    <span class="badge bg-info">Total Profile Views: {{ total_candidate_views }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Candidate Name</th>
+                                    <th>Election</th>
+                                    <th>Profile Views</th>
+                                    <th>Interest Gauge</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidate in top_candidates %}
+                                <tr>
+                                    <td><span class="fw-bold">{{ candidate.name }}</span></td>
+                                    <td>{{ candidate.election.title }}</td>
+                                    <td>{{ candidate.views_count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            {% set percent = (candidate.views_count / total_candidate_views * 100) if total_candidate_views > 0 else 0 %}
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ percent }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if not top_candidates %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No candidate engagement data available yet.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('voter.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('voter.view_election', election_id=candidate.election.id) }}">{{ candidate.election.title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ candidate.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white text-center py-4">
+                <h2 class="mb-0 fw-bold">{{ candidate.name }}</h2>
+                <span class="badge bg-primary mt-2">{{ candidate.election.title }} Candidate</span>
+            </div>
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-bullseye text-danger me-2"></i>Platform & Topics</h5>
+                <p class="lead">
+                    {% for keyword in candidate.platform_keywords.split(',') %}
+                        <span class="badge bg-secondary me-1">{{ keyword.strip() }}</span>
+                    {% endfor %}
+                </p>
+
+                <hr class="my-4">
+
+                <h5 class="fw-bold mb-3"><i class="fas fa-file-alt text-info me-2"></i>Manifesto / Detailed Description</h5>
+                <div class="bg-light p-3 rounded" style="white-space: pre-wrap; font-size: 1.1rem; line-height: 1.6;">{{ candidate.description }}</div>
+            </div>
+            <div class="card-footer bg-white py-3 text-muted small text-center">
+                <i class="fas fa-eye me-1"></i> Profile viewed {{ candidate.views_count }} times
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('voter.view_election', election_id=candidate.election.id) }}" class="btn btn-primary btn-lg px-5">
+                <i class="fas fa-arrow-left me-2"></i>Back to Election
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

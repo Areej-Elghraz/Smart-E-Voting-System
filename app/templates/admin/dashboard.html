@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <h2 class="display-6">{{ users_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Organizations</h5>
+                <h2 class="display-6">{{ orgs_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Elections</h5>
+                <h2 class="display-6">{{ elections_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Votes</h5>
+                <h2 class="display-6">{{ votes_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Election Status Distribution</h5></div>
+            <div class="card-body">
+                <canvas id="statusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white"><h5 class="mb-0">Recent Smart Alerts (AI & Rules)</h5></div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for alert in alerts %}
+                        <li class="list-group-item list-group-item-{{ alert.level }}">
+                            <strong>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</strong> - {{ alert.message }}
+                            {% if alert.election_id %} (Election ID: {{ alert.election_id }}) {% endif %}
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">No alerts triggered recently. System is operating normally.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: {{ status_labels|tojson|safe }},
+            datasets: [{
+                data: {{ status_data|tojson|safe }},
+                backgroundColor: ['#ffc107', '#198754', '#6c757d']
+            }]
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart E-Voting System Project Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --accent: #3b82f6;
+        }
+
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            page-break-after: always;
+            min-height: 29.7cm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Page 1: Cover */
+        #page1 {
+            justify-content: center;
+            text-align: center;
+            border: 10px solid var(--primary);
+            padding: 2cm;
+            box-sizing: border-box;
+        }
+
+        h1 { font-size: 3rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .subtitle { font-size: 1.5rem; color: var(--secondary); margin-bottom: 3rem; }
+
+        .idea-section {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: var(--light);
+            border-radius: 1rem;
+        }
+
+        .idea-en { font-style: italic; font-size: 1.2rem; margin-bottom: 1.5rem; }
+        .idea-ar { font-family: 'Amiri', serif; font-size: 1.8rem; direction: rtl; }
+
+        .team-section { margin-top: 4rem; }
+        .team-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .team-table th, .team-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .team-table th { background: var(--light); color: var(--primary); }
+
+        /* General Styling for other pages */
+        .content-page { padding: 2cm 0; }
+        h2 { font-size: 2rem; color: var(--primary); border-left: 5px solid var(--primary); padding-left: 1rem; margin-bottom: 1.5rem; }
+        h3 { font-size: 1.5rem; color: var(--accent); margin-top: 2rem; }
+        p { margin-bottom: 1.2rem; text-align: justify; }
+        
+        .feature-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+        }
+        .feature-title { font-weight: 700; color: var(--dark); display: block; margin-bottom: 0.5rem; }
+
+        .challenge-box {
+            background: #fff1f2;
+            border: 1px solid #fda4af;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .solution-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            margin: 2rem 0;
+            font-family: monospace;
+        }
+
+        .page-num {
+            margin-top: auto;
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1 -->
+    <div class="page" id="page1">
+        <h1>Smart E-Voting System</h1>
+        <div class="subtitle">Next-Generation Secure Democracy</div>
+        
+        <div class="idea-section">
+            <div class="idea-en">
+                "A cutting-edge electronic voting platform integrating Artificial Intelligence and Blockchain technology to ensure a secure, transparent, and highly accessible democratic process for modern organizations."
+            </div>
+            <div class="idea-ar">
+                "منصة تصويت إلكتروني متطورة تدمج تقنيات الذكاء الاصطناعي والبلوكشين لضمان عملية ديمقراطية آمنة وشفافة وسهلة الوصول للمنظمات الحديثة."
+            </div>
+        </div>
+
+        <div class="team-section">
+            <h3>Development Team</h3>
+            <table class="team-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>ID</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Areej Kamel Kamel Elghraz</td>
+                        <td>806518032</td>
+                        <td>Computer Science</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Aya Ayman El-Sayed Mohamed Diab</td>
+                        <td>806519345</td>
+                        <td>Computer Science</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Salwa Zakaria Mohamed Reda Abu Hasheesh</td>
+                        <td>806520860</td>
+                        <td>Computer Science</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="page-num">Page 1</div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page content-page">
+        <h2>Project Overview</h2>
+        
+        <h3>Idea Summary</h3>
+        <p>The Smart E-Voting System is a comprehensive digital transformation of traditional voting mechanisms, utilizing AI to personalize candidate matching and Blockchain to guarantee immutable records.</p>
+        <p>It aims to bridge the gap between technological security and user engagement by providing a platform that is both unhackable and intelligently helpful to voters.</p>
+
+        <h3>Detailed Explanation</h3>
+        <p>In the digital age, the integrity of elections is paramount. Our system addresses the core concerns of modern democracy: security, accessibility, and informed participation. By moving away from physical ballots to a blockchain-backed ledger, we eliminate the possibility of record tampering. Every vote is cryptographically linked to the previous one, creating a chain of trust that is verifiable yet completely anonymous.</p>
+        <p>Furthermore, we recognize that "informed voting" is a challenge. Many voters feel overwhelmed by candidate manifestos. Our system solves this by implementing Natural Language Processing (NLP) to analyze candidate descriptions. Voters can select topics they care about (e.g., healthcare, education, economy), and our AI calculates a match percentage between the user's interests and the candidate's actual written platform. This ensures that every vote is cast with clarity and purpose.</p>
+        
+        <div class="image-placeholder"><add: System Architecture Diagram showing Flask Backend, SQLite Database, and AI/NLP Service layer></div>
+        
+        <div class="page-num">Page 2</div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="page content-page">
+        <h2>Core Technical Features</h2>
+        <p>Our implementation focuses on three pillars: Automation, Intelligence, and Security. Below are the key features that define this smart system.</p>
+
+        <div class="feature-card">
+            <span class="feature-title">1. Automated Election Scheduling</span>
+            <p>Administers no longer need to manually toggle elections. By defining start and end times, the system's background monitoring hook automatically transitions election states from 'Upcoming' to 'Active' to 'Closed', ensuring precise temporal control without human error.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-title">2. AI-Powered Candidate Matching (NLP)</span>
+            <p>Using the Scikit-learn library, we implemented a TF-IDF (Term Frequency-Inverse Document Frequency) model. This allows the system to convert text into mathematical vectors. By applying Cosine Similarity, we can calculate how closely a candidate's manifesto matches a voter's selected interests.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-title">3. Automated Topic Extraction</span>
+            <p>Instead of hardcoding election themes, the system uses TF-IDF to analyze the manifestos of all candidates in an election dynamically. It extracts the top 10 most statistically significant keywords, which are then presented to voters as selectable "Election Themes".</p>
+        </div>
+
+        <div class="image-placeholder"><add: Screenshot of the Smart Recommendation Sidebar showing AI-extracted themes and matching scores></div>
+
+        <div class="page-num">Page 3</div>
+    </div>
+
+    <!-- PAGE 4 -->
+    <div class="page content-page">
+        <h2>Security and Analytics</h2>
+        <p>Security in e-voting isn't just about the vote itself, but also about the behavior of the people accessing the system.</p>
+
+        <div class="feature-card">
+            <span class="feature-title">4. Behavioral Security Analytics & IOB</span>
+            <p>The system implements "IOB" (Engagement Monitoring) to analyze user behavior. We track page transitions, time spent on specific registration steps, and rapid refresh rates. This data is fed into an Isolation Forest anomaly detection model to flag suspicious activity in real-time.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-title">5. Smart Risk Scoring</span>
+            <p>Every user session is assigned a Risk Score from 0 to 100. Factors influencing this score include IP address consistency, login velocity (detecting brute-force attempts), and unusual activity timing. High-risk sessions are flagged on the Admin Dashboard for immediate review.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-title">6. Blockchain-Linked Anonymous Ledger</span>
+            <p>To ensure vote integrity, we simulate a blockchain where each vote is a "block" containing the candidate ID, a timestamp, and the hash of the previous vote. This makes it impossible to delete or modify a single vote without breaking the entire chain.</p>
+        </div>
+
+        <div class="image-placeholder"><add: Screenshot of the Admin Analytics & Risk Dashboard showing the Risky Sessions table and Interest Gauges></div>
+
+        <div class="page-num">Page 4</div>
+    </div>
+
+    <!-- PAGE 5 -->
+    <div class="page content-page">
+        <h2>Administrative Controls</h2>
+        <p>The system provides a powerful suite of tools for administrators to manage organizations, users, and election integrity.</p>
+
+        <h3>Organization & User Management</h3>
+        <p>Administrators can create organizations with unique access codes, allowing users to join specific groups autonomously. The system supports full CRUD (Create, Read, Update, Delete) for users, organizations, and elections, with a performance-optimized caching layer to handle high traffic.</p>
+
+        <h3>Audit Logging</h3>
+        <p>Every critical action is logged in an immutable audit trail. This includes login successes/failures, organization joins, and vote submissions. This ensures complete accountability for all system interactions.</p>
+
+        <div class="feature-card">
+            <span class="feature-title">7. Secure Authentication (OTP & Lockout)</span>
+            <p>Voters are required to verify their identity via an Email OTP on their first login. To prevent brute-force attacks, accounts are automatically locked after 5 failed attempts, requiring administrative intervention to unlock.</p>
+        </div>
+
+        <div class="image-placeholder"><add: Screenshot of the Admin Elections Management Page showing candidates and scheduling options></div>
+
+        <div class="page-num">Page 5</div>
+    </div>
+
+    <!-- PAGE 6 -->
+    <div class="page content-page">
+        <h2>Challenges and Solutions</h2>
+        <p>Developing a high-stakes application like an e-voting system presents unique technical and design challenges. Below is how we overcame them.</p>
+
+        <div class="challenge-box">
+            <strong>Challenge: Anonymity vs. Accountability</strong>
+            <p>How do we ensure a user only votes once while keeping their actual choice completely anonymous?</p>
+        </div>
+        <div class="solution-box">
+            <strong>Solution: Separated Database Schemas</strong>
+            <p>We implemented a two-table system. The 'VoterRecord' tracks *who* has voted, while the 'Vote' table (the blockchain) tracks *what* was voted for. There is no database relationship linking the two, ensuring cryptographic anonymity while maintaining strict "one-vote-per-person" rules.</p>
+        </div>
+
+        <div class="challenge-box">
+            <strong>Challenge: Timezone & Scheduling Precision</strong>
+            <p>Local user inputs for election times often conflicted with UTC server times, causing elections to fail to activate.</p>
+        </div>
+        <div class="solution-box">
+            <strong>Solution: Naive Datetime Normalization</strong>
+            <p>We refactored the scheduling engine to use normalized naive datetimes, matching the HTML5 'datetime-local' standard with the backend processing logic, ensuring 100% accuracy in automated transitions.</p>
+        </div>
+
+        <div class="image-placeholder"><add: Comparison chart: Manual Voting vs. Smart E-Voting Security Tiers></div>
+
+        <div class="page-num">Page 6</div>
+    </div>
+
+    <!-- PAGE 7 -->
+    <div class="page content-page">
+        <h2>Conclusion and Future Scope</h2>
+        
+        <h3>Project Impact</h3>
+        <p>This Smart E-Voting system demonstrates that democracy can be enhanced through technology. By providing voters with AI tools to understand candidates and providing admins with Blockchain tools to secure results, we have created a model for future digital governance.</p>
+
+        <h3>Future Scope</h3>
+        <p>While the current system is robust, future iterations could include:</p>
+        <ul>
+            <li>Biometric Authentication integration (Fingerprint/Facial Recognition).</li>
+            <li>Decentralized Storage (IPFS) for election manifestos.</li>
+            <li>Advanced Predictive Analytics for voter turnout trends.</li>
+            <li>Integration with government ID systems for national-scale deployment.</li>
+        </ul>
+
+        <div style="margin-top: 5rem; text-align: center; border-top: 2px solid var(--primary); padding-top: 2rem;">
+            <p class="subtitle">"Securing the Voice of the People, One Block at a Time."</p>
+            <p>&copy; 2026 Smart E-Voting Project Team</p>
+        </div>
+
+        <div class="page-num">Page 7</div>
+    </div>
+
+</body>
+</html>
