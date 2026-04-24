@@ -74,9 +74,8 @@ Voters use the system to cast secure, anonymous ballots.
 
 ### 3.1 Registration & Login
 1. **Register:** Provide Username, Email, unique ID Card, and Password.
-2. **First Login (OTP):** On your first successful login, you must enter a 6-digit OTP sent to your email.
-3. **OTP Skipping:** After your first successful verification, future logins from the same account will bypass the OTP step to save time.
-4. **Security Locking:** If you enter the wrong password 5 times, your account will be locked for security. Contact an admin to unlock it.
+2. **Login:** Provide your username/email and password to access your dashboard.
+3. **Security Locking:** If you enter the wrong password 5 times, your account will be locked for security. Contact an admin to unlock it.
 
 ### 3.2 Joining Organizations & Candidate Profiles
 1. **Dashboard:** View organizations you belong to and active elections.

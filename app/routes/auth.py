@@ -5,7 +5,7 @@ from app import bcrypt, cache
 from app.smart_features import calculate_session_risk
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import requests
 
@@ -18,46 +18,6 @@ def log_audit(user_id, action, ip_address, details=""):
     log = AuditLog(user_id=user_id, action=action, ip_address=ip_address, details=details)
     db.session.add(log)
     db.session.commit()
-
-def generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
-
-def send_otp_email(email, otp):
-    # SendGrid API Key MUST be set as an environment variable for security
-    api_key = os.environ.get("SENDGRID_API_KEY")
-    if not api_key:
-        print("\n[SENDGRID ERROR] SENDGRID_API_KEY not set in environment.")
-        print(f"[BACKUP] OTP for {email} is: {otp}\n")
-        return
-        
-    url = "https://api.sendgrid.com/v3/mail/send"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "personalizations": [{
-            "to": [{"email": email}],
-            "subject": "Your Login OTP - Smart E-Voting"
-        }],
-        "from": {"email": "areejelghrazzz@gmail.com"},
-        "content": [{
-            "type": "text/plain",
-            "value": f"Your OTP for login is: {otp}"
-        }]
-    }
-    
-    try:
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 202:
-            print(f"\n[SENDGRID] OTP sent successfully to {email}")
-        else:
-            print(f"\n[SENDGRID ERROR] Status: {response.status_code}, Body: {response.text}")
-    except Exception as e:
-        print(f"\n[SENDGRID ERROR] Exception: {e}")
-    
-    # Always print to console as backup
-    print(f"[BACKUP] OTP for {email} is: {otp}\n")
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -103,34 +63,22 @@ def login():
         user = User.query.filter((User.username == login_id) | (User.email == login_id)).first()
         
         if user and bcrypt.check_password_hash(user.password_hash, password):
-            if user.role == 'admin' or user.has_verified_otp:
-                login_user(user, remember=request.form.get('remember') == 'on')
-                log_audit(user.id, 'Login Success', request.remote_addr)
-                if user.role == 'admin':
-                    return redirect(url_for('admin.dashboard'))
-                return redirect(url_for('voter.dashboard'))
-                
-            otp = generate_otp()
-            session['otp'] = otp
-            session['pending_user_id'] = user.id
-            session['remember'] = request.form.get('remember') == 'on'
-            session['resend_attempts'] = 0
-            session['lockout_time'] = None
+            login_user(user, remember=request.form.get('remember') == 'on')
+            log_audit(user.id, 'Login Success', request.remote_addr)
             
-            send_otp_email(user.email, otp)
-                
-            # Reset failed attempts on password success (but still need OTP)
+            # Reset security metrics
             user.failed_login_count = 0
             user.last_login_ip = request.remote_addr
             db.session.commit()
             
-            # Behavioral Security: Session Risk Score
+            # Behavioral Security: Session Risk Score (Still monitored)
             risk_score, factors = calculate_session_risk(user.id, request.remote_addr, session.get('_id', 'unknown'))
             if risk_score > 70:
-                flash(f'Security Alert: Unusual login activity detected (Risk Score: {risk_score}). Additional verification required.', 'warning')
+                flash(f'Security Alert: Unusual login activity detected (Risk Score: {risk_score}).', 'warning')
             
-            flash('An OTP has been sent to your email.', 'info')
-            return redirect(url_for('auth.verify_otp'))
+            if user.role == 'admin':
+                return redirect(url_for('admin.dashboard'))
+            return redirect(url_for('voter.dashboard'))
         else:
             if user:
                 user.failed_login_count += 1
@@ -143,85 +91,6 @@ def login():
             flash('Login Unsuccessful. Please check your credentials.', 'danger')
             
     return render_template('auth/login.html')
-
-@auth_bp.route('/verify_otp', methods=['GET', 'POST'])
-def verify_otp():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-        
-    if 'pending_user_id' not in session:
-        flash('Session expired or invalid. Please login again.', 'danger')
-        return redirect(url_for('auth.login'))
-        
-    if request.method == 'POST':
-        entered_otp = request.form.get('otp')
-        expected_otp = session.get('otp')
-        
-        if entered_otp == expected_otp:
-            user = User.query.get(session['pending_user_id'])
-            if user:
-                user.has_verified_otp = True
-                db.session.commit()
-                
-                login_user(user, remember=session.get('remember', False))
-                log_audit(user.id, 'Login Success', request.remote_addr)
-                
-                # Cleanup session
-                session.pop('otp', None)
-                session.pop('pending_user_id', None)
-                session.pop('remember', None)
-                session.pop('resend_attempts', None)
-                session.pop('lockout_time', None)
-                
-                if current_user.role == 'admin':
-                    return redirect(url_for('admin.dashboard'))
-                return redirect(url_for('voter.dashboard'))
-            else:
-                flash('User not found. Please login again.', 'danger')
-                return redirect(url_for('auth.login'))
-        else:
-            flash('Invalid OTP. Please try again.', 'danger')
-            
-    return render_template('auth/verify_otp.html')
-
-@auth_bp.route('/resend_otp', methods=['POST'])
-def resend_otp():
-    if 'pending_user_id' not in session:
-        flash('Session expired. Please login again.', 'danger')
-        return redirect(url_for('auth.login'))
-        
-    # Check lockout
-    if session.get('lockout_time'):
-        lockout_time = datetime.fromisoformat(session['lockout_time'])
-        if datetime.utcnow() < lockout_time:
-            wait_time = int((lockout_time - datetime.utcnow()).total_seconds() / 60)
-            flash(f'You have exceeded the maximum resend attempts. Please wait {wait_time} minutes before trying again.', 'danger')
-            return redirect(url_for('auth.verify_otp'))
-        else:
-            # Lockout expired, reset attempts
-            session['resend_attempts'] = 0
-            session['lockout_time'] = None
-
-    attempts = session.get('resend_attempts', 0)
-    
-    if attempts >= MAX_RESEND_ATTEMPTS:
-        lockout_time = datetime.utcnow() + timedelta(minutes=LOCKOUT_MINUTES)
-        session['lockout_time'] = lockout_time.isoformat()
-        flash(f'Maximum resend attempts reached. Please wait {LOCKOUT_MINUTES} minutes.', 'danger')
-        return redirect(url_for('auth.verify_otp'))
-        
-    user = User.query.get(session['pending_user_id'])
-    if user:
-        otp = generate_otp()
-        session['otp'] = otp
-        session['resend_attempts'] = attempts + 1
-        
-        send_otp_email(user.email, otp)
-        flash('A new OTP has been sent to your email.', 'success')
-    else:
-        flash('User error.', 'danger')
-        
-    return redirect(url_for('auth.verify_otp'))
 
 @auth_bp.route('/logout')
 @login_required
