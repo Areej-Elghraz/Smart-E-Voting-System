@@ -40,7 +40,7 @@ def register():
             return redirect(url_for('auth.register'))
             
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(username=username, email=email, id_card=id_card, password_hash=hashed_password, role='voter')
+        user = User(username=username, email=email, id_card=id_card, password_hash=hashed_password, role='voter', has_verified_otp=True)
         db.session.add(user)
         db.session.commit()
         
