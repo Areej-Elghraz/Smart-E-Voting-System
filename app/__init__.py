@@ -1,8 +1,5 @@
 from flask import Flask
 import os
-import socket
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_caching import Cache
@@ -13,8 +10,6 @@ login_manager = LoginManager()
 cache = Cache()
 
 def create_app():
-    # Set a short timeout for SMTP connections to prevent worker timeouts
-    socket.setdefaulttimeout(10)
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey_for_evoting_system_change_in_production')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///evoting.db'
