@@ -6,3 +6,5 @@ Flask-Mail
 Flask-Caching
 scikit-learn
 numpy
+gunicorn
+gradio_client
