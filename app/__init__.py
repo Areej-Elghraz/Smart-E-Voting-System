@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -12,7 +13,7 @@ cache = Cache()
 
 def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
-    app.config['SECRET_KEY'] = 'supersecretkey_for_evoting_system_change_in_production'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey_for_evoting_system_change_in_production')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///evoting.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
@@ -25,9 +26,9 @@ def create_app():
     app.config['MAIL_PORT'] = 465
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = 'areejelghrazzz@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'dczqfwodlpoubasp'
-    app.config['MAIL_DEFAULT_SENDER'] = 'areejelghrazzz@gmail.com'
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'areejelghrazzz@gmail.com')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'dczqfwodlpoubasp')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'areejelghrazzz@gmail.com')
 
     db.init_app(app)
     bcrypt.init_app(app)

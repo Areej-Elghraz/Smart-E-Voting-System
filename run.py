@@ -13,14 +13,15 @@ def index():
         return redirect(url_for('voter.dashboard'))
     return render_template('index.html')
 
+with app.app_context():
+    db.create_all()
+    # Create a default admin user if none exists
+    if not User.query.filter_by(username='admin').first():
+        hashed_pw = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        admin = User(username='admin', email='admin@evoting.com', id_card='ADMIN001', password_hash=hashed_pw, role='admin')
+        db.session.add(admin)
+        db.session.commit()
+        print("Default admin verified/created.")
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        # Create a default admin user if none exists
-        if not User.query.filter_by(username='admin').first():
-            hashed_pw = bcrypt.generate_password_hash('admin123').decode('utf-8')
-            admin = User(username='admin', email='admin@evoting.com', id_card='ADMIN001', password_hash=hashed_pw, role='admin')
-            db.session.add(admin)
-            db.session.commit()
-            print("Default admin created: admin / admin123")
-    app.run(debug=True)
+    app.run(debug=False)
