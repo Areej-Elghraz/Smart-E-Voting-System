@@ -1,1 +1,1 @@
-# Smart E-voting System
+# Smart E-Voting System
