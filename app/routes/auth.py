@@ -3,16 +3,10 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.models import db, User, AuditLog
 from app import bcrypt, cache
 from app.smart_features import calculate_session_risk
-import random
-import string
 from datetime import datetime
-import os
-import requests
+from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__)
-
-MAX_RESEND_ATTEMPTS = 3
-LOCKOUT_MINUTES = 5
 
 def log_audit(user_id, action, ip_address, details=""):
     log = AuditLog(user_id=user_id, action=action, ip_address=ip_address, details=details)
@@ -46,8 +40,14 @@ def register():
         
         log_audit(user.id, 'Register', request.remote_addr, f'Registered user {username}')
         cache.delete('admin_users')
-        flash('Your account has been created! You are now able to log in.', 'success')
-        return redirect(url_for('auth.login'))
+        
+        # Log in the user automatically after registration
+        login_user(user)
+        flash('Account created and logged in successfully!', 'success')
+        
+        if user.role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('voter.dashboard'))
         
     return render_template('auth/register.html')
 
