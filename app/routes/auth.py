@@ -7,6 +7,7 @@ from app.smart_features import calculate_session_risk
 import random
 import string
 from datetime import datetime, timedelta
+from threading import Thread
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -21,16 +22,23 @@ def log_audit(user_id, action, ip_address, details=""):
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
-def send_otp_email(email, otp):
-    try:
-        msg = Message('Your Login OTP', sender='areejelghrazzz@gmail.com', recipients=[email])
-        msg.body = f'Your OTP for login is: {otp}'
-        mail.send(msg)
-        print(f"\n OTP sent successfully to your email")
-        print(f"[EMAIL SIMULATION] OTP for {email} is: {otp}\n")
-    except Exception as e:
-        print(f"\n[EMAIL SIMULATION] Could not send email due to missing config/error: {e}")
-        print(f"[EMAIL SIMULATION] OTP for {email} is: {otp}\n")
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+            print(f"\n OTP sent successfully to email")
+        except Exception as e:
+            print(f"\n[EMAIL ERROR] Could not send email: {e}")
+
+def send_otp_email(app, email, otp):
+    msg = Message('Your Login OTP', sender='areejelghrazzz@gmail.com', recipients=[email])
+    msg.body = f'Your OTP for login is: {otp}'
+    
+    # Send in background thread
+    Thread(target=send_async_email, args=(app._get_current_object(), msg)).start()
+    
+    # Always print to console for development/backup
+    print(f"\n[BACKUP] OTP for {email} is: {otp}\n")
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -90,8 +98,9 @@ def login():
             session['resend_attempts'] = 0
             session['lockout_time'] = None
             
-            send_otp_email(user.email, otp)
-            
+            from flask import current_app
+            send_otp_email(current_app, user.email, otp)
+                
             # Reset failed attempts on password success (but still need OTP)
             user.failed_login_count = 0
             user.last_login_ip = request.remote_addr
@@ -189,7 +198,8 @@ def resend_otp():
         session['otp'] = otp
         session['resend_attempts'] = attempts + 1
         
-        send_otp_email(user.email, otp)
+        from flask import current_app
+        send_otp_email(current_app, user.email, otp)
         flash('A new OTP has been sent to your email.', 'success')
     else:
         flash('User error.', 'danger')

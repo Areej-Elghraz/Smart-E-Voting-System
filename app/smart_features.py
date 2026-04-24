@@ -75,51 +75,58 @@ def calculate_session_risk(user_id, ip_address, session_id):
     """
     Calculates a risk score for a session based on behavioral factors.
     """
-    user = User.query.get(user_id)
-    risk_score = 0.0
-    factors = []
-    
-    if not user:
-        return 100.0, ["User not found"]
-
-    # 1. New IP Check
-    if user.last_login_ip and user.last_login_ip != ip_address:
-        risk_score += 30
-        factors.append("Login from new IP address")
-    
-    # 2. Failed Login Attempts
-    if user.failed_login_count > 0:
-        risk_score += (user.failed_login_count * 10)
-        factors.append(f"{user.failed_login_count} failed login attempts")
+    try:
+        user = User.query.get(user_id)
+        risk_score = 0.0
+        factors = []
         
-    # 3. Unusual Time (e.g. 1 AM to 5 AM)
-    current_hour = datetime.utcnow().hour
-    if 1 <= current_hour <= 5:
-        risk_score += 20
-        factors.append("Unusual login time (Late night)")
-        
-    # 4. Rapid Session Activity (Behavioral)
-    recent_actions = AuditLog.query.filter_by(user_id=user_id).order_by(AuditLog.timestamp.desc()).limit(10).all()
-    if len(recent_actions) >= 2:
-        time_span = (recent_actions[0].timestamp - recent_actions[-1].timestamp).total_seconds()
-        if time_span < 5: # 10 actions in 5 seconds
-            risk_score += 40
-            factors.append("Abnormally fast interaction (Bot-like behavior)")
+        if not user:
+            return 100.0, ["User not found"]
 
-    risk_score = min(risk_score, 100.0)
-    
-    # Save risk score
-    risk_record = SessionRisk(
-        user_id=user_id,
-        session_id=session_id,
-        ip_address=ip_address,
-        risk_score=risk_score,
-        risk_factors=json.dumps(factors)
-    )
-    db.session.add(risk_record)
-    db.session.commit()
-    
-    return risk_score, factors
+        # 1. New IP Check
+        if user.last_login_ip and user.last_login_ip != ip_address:
+            risk_score += 30
+            factors.append("Login from new IP address")
+        
+        # 2. Failed Login Attempts
+        if user.failed_login_count and user.failed_login_count > 0:
+            risk_score += (user.failed_login_count * 10)
+            factors.append(f"{user.failed_login_count} failed login attempts")
+            
+        # 3. Unusual Time (e.g. 1 AM to 5 AM)
+        current_hour = datetime.utcnow().hour
+        if 1 <= current_hour <= 5:
+            risk_score += 20
+            factors.append("Unusual login time (Late night)")
+            
+        # 4. Rapid Session Activity (Behavioral)
+        recent_actions = AuditLog.query.filter_by(user_id=user_id).order_by(AuditLog.timestamp.desc()).limit(10).all()
+        if len(recent_actions) >= 2:
+            t1 = recent_actions[0].timestamp
+            t2 = recent_actions[-1].timestamp
+            if t1 and t2:
+                time_span = (t1 - t2).total_seconds()
+                if time_span < 5: # 10 actions in 5 seconds
+                    risk_score += 40
+                    factors.append("Abnormally fast interaction (Bot-like behavior)")
+
+        risk_score = min(risk_score, 100.0)
+        
+        # Save risk score
+        risk_record = SessionRisk(
+            user_id=user_id,
+            session_id=session_id,
+            ip_address=ip_address,
+            risk_score=risk_score,
+            risk_factors=json.dumps(factors)
+        )
+        db.session.add(risk_record)
+        db.session.commit()
+        
+        return risk_score, factors
+    except Exception as e:
+        print(f"Risk calculation error: {e}")
+        return 0.0, []
 
 def analyze_engagement(election_id=None):
     """
