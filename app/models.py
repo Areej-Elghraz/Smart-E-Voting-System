@@ -17,7 +17,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True, nullable=False)
     id_card = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(db.String(50), default='voter') # 'admin' or 'voter'
+    role = db.Column(db.String(50), default='user') # 'admin' or 'user'
     last_login_ip = db.Column(db.String(50))
     failed_login_count = db.Column(db.Integer, default=0)
     is_locked = db.Column(db.Boolean, default=False)
