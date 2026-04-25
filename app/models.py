@@ -46,8 +46,10 @@ class Election(db.Model):
     organization_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
     
     # Relationships
-    candidates = db.relationship('Candidate', backref='election', lazy=True)
-    votes = db.relationship('Vote', backref='election', lazy=True, order_by='Vote.id')
+    candidates = db.relationship('Candidate', backref='election', lazy=True, cascade="all, delete-orphan")
+    votes = db.relationship('Vote', backref='election', lazy=True, cascade="all, delete-orphan")
+    voter_records = db.relationship('VoterRecord', backref='election', lazy=True, cascade="all, delete-orphan")
+    alerts = db.relationship('Alert', backref='election', lazy=True, cascade="all, delete-orphan")
 
 class Candidate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,6 +58,9 @@ class Candidate(db.Model):
     platform_keywords = db.Column(db.String(255)) # comma-separated keywords for recommendations
     views_count = db.Column(db.Integer, default=0)
     election_id = db.Column(db.Integer, db.ForeignKey('election.id'), nullable=False)
+    
+    # Relationships
+    votes = db.relationship('Vote', backref='candidate', lazy=True, cascade="all, delete-orphan")
 
 class VoterRecord(db.Model):
     """Tracks if a user has voted in an election to enforce one-vote, without linking to the specific vote"""
